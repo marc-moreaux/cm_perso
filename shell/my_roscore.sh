@@ -1,17 +1,7 @@
 #!/bin/bash
 
-print_help(){
-  echo ""
-  echo " --my_roscore ip [ip2 ..]"
-}
 
 
-
-if [ -z "$1" ]
-then
-  print_help
-  exit
-fi
 
 
 # IP of the computer
@@ -27,16 +17,28 @@ source /home/mmoreaux/catkin_ws_ork/devel/setup.bash
 
 for M_PORT in {12345..12347}
 do 
-
-  Set_NAO_IP_from_port $M_PORT
+  if [ "$M_PORT" = "12345" ]
+  then
+    sourceindigo
+    NAO_IP='jarc.local'
+  elif [ "$M_PORT" = "12346" ]
+  then
+    sourceindigo
+    NAO_IP='aipepper3.local'
+  else
+    source ~/work/catkin_ws_naoqi_driver/devel/setup.bash
+    NAO_IP='pepperlaurent.local'
+  fi
   export ROS_MASTER_URI=http://10.0.160.147:$M_PORT/
   export ROS_NAMESPACE=$M_PORT
+  echo "$M_PORT"
 
 
   echo ""
   echo "################################"
   echo "    launching roscore at :   "
   echo "  $ROS_MASTER_URI       "
+  echo "  on $NAO_IP            "
   echo "################################"
 
   roscore -p $M_PORT &
@@ -46,17 +48,15 @@ do
   echo "--launch rosbridge on robot"
   echo " -> $NAO_IP"
   echo " -> $ROS_MASTER_URI"
-  if [ "$WITH_RVIZ" = "1" ]
-  then
-    rosrun rviz rviz &
-  fi
-  source ~/work/catkin_ws_naoqi_driver/devel/setup.bash
+  
+
+
   roslaunch naoqi_driver naoqi_driver.launch >/dev/null &
 
 
-  ssh -f nao@$NAO_IP "qicli call ALMotion.setAngles HeadYaw 0 0.5"
-  sleep 1
-  ssh -f nao@$NAO_IP "qicli call ALMotion.setAngles HeadPitch .4 0.5"
+  # ssh -f nao@$NAO_IP "qicli call ALMotion.setAngles HeadYaw 0 0.5"
+  # sleep 1
+  # ssh -f nao@$NAO_IP "qicli call ALMotion.setAngles HeadPitch .4 0.5"
 
 
 done

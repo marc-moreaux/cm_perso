@@ -47,36 +47,32 @@ do
     /tf &
     # /$M_PORT/camera/bottom/camera_info \
     # /$M_PORT/camera/bottom/image_raw \
-
-
-
   done
   sleep 150 # record 2'30
 
-  echo ""
-  echo " --- moving $M_PORT rosbags"
-  for BAG in $M_PORT*.bag
-  do
-    scp $BAG 10.0.161.123:/media/raid/mmoreaux_raid &&
-    rm $BAG &
-  done
+  # for BAG in *bag
+  # do
+  #   echo " --- moving $BAG "
+  #   scp $BAG 10.0.161.123:/media/raid/mmoreaux_raid &&
+  #   rm $BAG &
+  # done
 
 done
-
-sleep 5
-echo ""
-echo " --- moving $M_PORT rosbags"
-for BAG in $M_PORT*.bag
-do
-  scp $BAG 10.0.161.123:/media/raid/mmoreaux_raid &&
-  rm $BAG &
-done
-
 
 sleep 10
-pkill roscore
-pkill naoqi_driver
-pkill rviz
+# echo ""
+# echo " --- moving $M_PORT rosbags"
+# for BAG in *.bag
+# do
+#   scp $BAG 10.0.161.123:/media/raid/mmoreaux_raid &&
+#   rm $BAG &
+# done
+
+
+# sleep 10
+# pkill roscore
+# pkill naoqi_driver
+# pkill rviz
 pkill rosbag
 pgrep -f nodelet | xargs kill
 pgrep -f object_recognition_core | xargs kill

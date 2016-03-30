@@ -46,6 +46,20 @@ depth_registered/image_rect:=/$1/camera/depth_registered/image_rect \
 points:=/$1/camera/depth_registered/points &
 
 
+# with the 2 following nodlets, rectify the rgb image and the depth point cloud so they match together.
+rosrun nodelet nodelet load depth_image_proc/register nodelet_manager __name:=nodelet1 \
+rgb/camera_info:=/naoqi_driver_node/camera/front/camera_info \
+depth/camera_info:=/naoqi_driver_node/camera/depth/camera_info \
+depth/image_rect:=/naoqi_driver_node/camera/depth/image_raw \
+depth_registered/image_rect:=/naoqi_driver_node/camera/depth_registered/image_rect &
+
+rosrun nodelet nodelet load depth_image_proc/point_cloud_xyzrgb nodelet_manager __name:=nodelet2 \
+rgb/camera_info:=/naoqi_driver_node/camera/front/camera_info \
+rgb/image_rect_color:=/naoqi_driver_node/camera/front/image_raw \
+depth_registered/image_rect:=/naoqi_driver_node/camera/depth_registered/image_rect \
+points:=/naoqi_driver_node/camera/depth_registered/points &
+
+
 
 #rosrun object_recognition_core detection -c `rospack find object_recognition_linemod`/conf/detection_pepper.ros.ork
 rosrun object_recognition_core detection -c `rospack find object_recognition_tabletop`/conf/detection_$1.table.ros.ork &

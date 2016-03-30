@@ -1,0 +1,30 @@
+/anotation <==> std_msg/int8
+
+00 - sit_start
+01 - sit_end
+
+10 - read_start
+11 - read_grab_book
+12 - read_start_book
+13 - read_close_book
+14 - read_end
+
+20 - call_start
+21 - call_grab
+22 - call_diall_start
+23 - call_dial_end
+24 - call_speak_start
+25 - call_speak_end
+26 - call_end
+
+30 - drink_start
+31 - drink_toss_start
+32 - drink_toss_end
+33 - drink_grab
+34 - drink_drink_start
+35 - drink_drink_end
+36 - drink end
+
+40 - raise_start
+41 - raise_end
+

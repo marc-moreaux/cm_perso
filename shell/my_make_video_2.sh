@@ -13,8 +13,9 @@ roscore &
 sleep 3
 
 # For every of these bags, extract the sound and pictures then make the videos
-for BAGS_DIR in {toAnotate10/ toAnotate3/ toAnotate6/ toAnotate8/ goodBags5/ toAnotate11/ toAnotate5/ toAnotate7/ toAnotate9/}
+for BAGS_DIR in {goodBags4/ goodBags5/ toAnotate10/ toAnotate3/ toAnotate6/ toAnotate8/ toAnotate11/ toAnotate5/ toAnotate7/ toAnotate9/}
 do
+	BAGS_DIR=~/rosbag/$BAGS_DIR
 	cd $BAGS_DIR
 
 
@@ -57,7 +58,8 @@ do
 
 		# Kill the image_view module
 		pgrep -f image_view | xargs kill
-	done
+	done # end of image extraction
+	
 
 	echo "#################################"
 	echo "### For every bag in the folder, "

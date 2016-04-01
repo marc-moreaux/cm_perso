@@ -8,6 +8,7 @@ import tarfile
 from IPython.display import display, Image
 from scipy import ndimage
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_squared_error
 from six.moves.urllib.request import urlretrieve
 from six.moves import cPickle as pickle
 
@@ -55,7 +56,7 @@ def load_letter(folder, min_num_images):
   for image in os.listdir(folder):
     image_file = os.path.join(folder, image)
     try:
-      image_data = (ndimage.imread(image_file).astype(float) - 
+      image_data = (ndimag.eimread(image_file).astype(float) - 
                     pixel_depth / 2) / pixel_depth
       if image_data.shape != (image_size, image_size):
         raise Exception('Unexpected image shape: %s' % str(image_data.shape))
@@ -74,7 +75,7 @@ def load_letter(folder, min_num_images):
   print('Mean:', np.mean(dataset))
   print('Standard deviation:', np.std(dataset))
   return dataset
-        
+
 def maybe_pickle(data_folders, min_num_images_per_class, force=False):
   dataset_names = []
   for folder in data_folders:
@@ -135,7 +136,7 @@ def merge_datasets(pickle_files, train_size, valid_size=0):
       raise
     
   return valid_dataset, valid_labels, train_dataset, train_labels
-            
+
 def randomize(dataset, labels):
   permutation = np.random.permutation(labels.shape[0])
   shuffled_dataset = dataset[permutation,:,:]
@@ -144,10 +145,11 @@ def randomize(dataset, labels):
 
 
 
-url = 'http://yaroslavvb.com/upload/notMNIST/'
+######################################
+### Open all the thingy
+######################################
 
-train_filename = maybe_download('notMNIST_large.tar.gz', 247336696)
-test_filename = maybe_download('notMNIST_small.tar.gz', 8458043)
+url = 'http://yaroslavvb.com/upload/notMNIST/'
 
 num_classes = 10
 np.random.seed(133)
@@ -155,23 +157,42 @@ np.random.seed(133)
 image_size = 28  # Pixel width and height.
 pixel_depth = 255.0  # Number of levels per pixel.
 
+train_filename = maybe_download('notMNIST_large.tar.gz', 247336696)
+test_filename = maybe_download('notMNIST_small.tar.gz', 8458043)
+
+train_folders = maybe_extract(train_filename)
+test_folders = maybe_extract(test_filename)
+
 train_datasets = maybe_pickle(train_folders, 45000)
 test_datasets = maybe_pickle(test_folders, 1800)
 
 
-# print image
-mFile = open('notMNIST_large/A.pickle')
+######################################
+### Problem 1
+###  Let's take a peek at some of the data to make sure it looks sensible. 
+###  Each exemplar should be an image of a character A through J rendered 
+###  in a different font. Display a sample of the images that we just downloaded. 
+###  Hint: you can use the package IPython.display.
+######################################
+mFile = open('notMNIST_large/A.pickle', "rb")
 img = pickle.load(mFile)
 plt.imshow(img[0])
 plt.show()
 
 
+######################################
+### Problem 3
+###  Another check: 
+###  we expect the data to be balanced across classes. 
+###  Verify that.
+######################################
 for i in range(len(train_datasets)):
-  ds = pickle.load(open(train_datasets[i]))
-  print(i)
-  print(len(ds))
+  ds = pickle.load(open(train_datasets[i], "rb"))
+  print("class",i," : ",len(ds), "samples")
 
 
+
+# Randomize the data. It's important to have the labels well shuffled for the training and test distributions to match.
 train_size = 200000
 valid_size = 10000
 test_size = 10000
@@ -187,8 +208,8 @@ train_dataset, train_labels = randomize(train_dataset, train_labels)
 test_dataset, test_labels = randomize(test_dataset, test_labels)
 valid_dataset, valid_labels = randomize(valid_dataset, valid_labels)
 
+# Save the data for later reuse
 pickle_file = 'notMNIST.pickle'
-
 try:
   f = open(pickle_file, 'wb')
   save = {
@@ -209,8 +230,11 @@ except Exception as e:
 statinfo = os.stat(pickle_file)
 print('Compressed pickle size:', statinfo.st_size)
 
-
-
+######################################
+### Problem 5-a
+###  Measure how much overlap there is between 
+###  training, validation and test samples.
+######################################
 fig = plt.figure()
 for j in range(3):
   for i in range(5):
@@ -222,7 +246,11 @@ for j in range(3):
 plt.show()
 
 
-
+######################################
+### Problem 5-b
+###  Create a sanitized validation and test set, 
+###  and compare your accuracy on those in subsequent assignments.
+######################################
 all_dataset = np.concatenate( (train_dataset, valid_dataset, test_dataset), axis=0 )
 idx_to_rm_train = list()
 idx_to_rm_valid = list()
@@ -239,9 +267,6 @@ for i in range(len(all_dataset)):
       else:
         idx_to_rm_test.append((i,j))
 
-
-
-
       # fig = plt.figure()
       # plt.title(str(mse))
       # fig.add_subplot(1,2,1)
@@ -253,7 +278,13 @@ for i in range(len(all_dataset)):
 
 
 
-# Train the model using the training sets
+######################################
+### Problem 6
+###  Let's get an idea of what an off-the-shelf classifier can give
+###  you on this data. It's always good to check that there is 
+###  something to learn, and that it's a problem that is not so trivial 
+###  that a canned solution solves it.
+######################################
 for size in (50, 100, 1000, 5000):
   logreg = LogisticRegression()
   tmp_train_X = train_dataset[0:size].reshape(len(train_dataset[0:size]), -1)

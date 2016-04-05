@@ -168,7 +168,7 @@ test_datasets = maybe_pickle(test_folders, 1800)
 
 
 ######################################
-### Problem 1
+### Problem 1 - 2
 ###  Let's take a peek at some of the data to make sure it looks sensible. 
 ###  Each exemplar should be an image of a character A through J rendered 
 ###  in a different font. Display a sample of the images that we just downloaded. 
@@ -235,6 +235,9 @@ print('Compressed pickle size:', statinfo.st_size)
 ###  Measure how much overlap there is between 
 ###  training, validation and test samples.
 ######################################
+### 1st check if MSE is a good distance function
+### by printing its value related to another image
+
 fig = plt.figure()
 for j in range(3):
   for i in range(5):
@@ -242,7 +245,6 @@ for j in range(3):
     plt.imshow(valid_dataset[i+j*5])
     mse = mean_squared_error(valid_dataset[1], valid_dataset[i+j*5])
     sfig.set_title(str(mse) +' '+ str(i+j*5))
-
 plt.show()
 
 
@@ -252,9 +254,9 @@ plt.show()
 ###  and compare your accuracy on those in subsequent assignments.
 ######################################
 all_dataset = np.concatenate( (train_dataset, valid_dataset, test_dataset), axis=0 )
-idx_to_rm_train = list()
-idx_to_rm_valid = list()
-idx_to_rm_test  = list()
+idx_to_rm_train = list() # len of this is answer to 5-a
+idx_to_rm_valid = list() # len of this is answer to 5-a
+idx_to_rm_test  = list() # len of this is answer to 5-a
 
 for i in range(len(all_dataset)):
   for j in range(i+1, len(all_dataset)):

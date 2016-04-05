@@ -16,10 +16,7 @@ def accuracy(predictions, labels):
   return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
           / predictions.shape[0])
 
-
 pickle_file = 'notMNIST.pickle'
-
-
 with open(pickle_file, 'rb') as f:
   save = pickle.load(f)
   train_dataset = save['train_dataset']
@@ -49,8 +46,9 @@ train_subset = 10000
 
 
 #####################################
-#    ???
+### Build the computation graph
 #####################################
+num_steps = 801
 
 graph = tf.Graph()
 with graph.as_default():
@@ -60,7 +58,7 @@ with graph.as_default():
   tf_valid_dataset = tf.constant(valid_dataset)
   tf_test_dataset = tf.constant(test_dataset)
   
-  # Variables.
+  # Variables (W & b).
   weights = tf.Variable( tf.truncated_normal([image_size * image_size, num_labels]))
   biases = tf.Variable(tf.zeros([num_labels]))
   
@@ -76,9 +74,6 @@ with graph.as_default():
   valid_prediction = tf.nn.softmax( tf.matmul(tf_valid_dataset, weights) + biases)
   test_prediction = tf.nn.softmax(tf.matmul(tf_test_dataset, weights) + biases)
 
-
-num_steps = 801
-
 with tf.Session(graph=graph) as session:
   # Ensures the parameters get initialized
   tf.initialize_all_variables().run()
@@ -92,15 +87,14 @@ with tf.Session(graph=graph) as session:
         predictions, train_labels[:train_subset, :]))
       print('Validation accuracy: %.1f%%' % accuracy(
         valid_prediction.eval(), valid_labels))
-
   print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
 
 
 #####################################
-#    stochastic gradient descent
+### Stochastic gradient descent
 #####################################
-
 batch_size = 128
+num_steps = 3001
 
 graph = tf.Graph()
 with graph.as_default():
@@ -110,7 +104,7 @@ with graph.as_default():
   tf_valid_dataset = tf.constant(valid_dataset)
   tf_test_dataset = tf.constant(test_dataset)
   
-  # Variables.
+  # Variables (W & b).
   weights = tf.Variable(tf.truncated_normal([image_size * image_size, num_labels]))
   biases = tf.Variable(tf.zeros([num_labels]))
   
@@ -126,9 +120,6 @@ with graph.as_default():
   valid_prediction = tf.nn.softmax(tf.matmul(tf_valid_dataset, weights) + biases)
   test_prediction = tf.nn.softmax(tf.matmul(tf_test_dataset, weights) + biases)
 
-
-num_steps = 3001
-
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
   print("Initialized")
@@ -152,12 +143,13 @@ with tf.Session(graph=graph) as session:
 
 
 
-#####################################
-#    hidden layer neural network 
-# with rectified linear units (nn.relu()) 
-#       and 1024 hidden nodes
-#####################################
+#######################################
+###    Hidden layer neural network 
+### with rectified linear units (nn.relu()) 
+###       and 1024 hidden nodes
+#######################################
 batch_size = 128
+num_steps = 3001
 
 graph = tf.Graph()
 with graph.as_default():
@@ -167,27 +159,26 @@ with graph.as_default():
   tf_valid_dataset = tf.constant(valid_dataset)
   tf_test_dataset = tf.constant(test_dataset)
   
-  # Variables.
+  # Variables (W & b).
   weights_h = tf.Variable(tf.truncated_normal([image_size * image_size, 1024]))
   biases_h = tf.Variable(tf.zeros([1024]))
   weights = tf.Variable(tf.truncated_normal([1024, num_labels]))
   biases = tf.Variable(tf.zeros([num_labels]))
   
   # Training computation.
-  layer1 = tf.matmul(tf_train_dataset, weights_h) + biases_h
-  logits = tf.matmul(layer1, weights) + biases
-  loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+  def prediction(m_input):
+    layer1 = tf.nn.relu( tf.matmul(m_input, weights_h) + biases_h )
+    logits = tf.matmul(layer1, weights) + biases 
+    return logits
+  loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction(tf_train_dataset), tf_train_labels))
   
   # Optimizer.
   optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
   
   # Predictions for the training, validation, and test data.
-  train_prediction = tf.nn.softmax(logits)
-  valid_prediction = tf.nn.softmax( tf.matmul( tf.nn.relu(tf.matmul(tf_valid_dataset, weights_h) + biases_h), weights ) + biases )
-  test_prediction  = tf.nn.softmax( tf.matmul( tf.nn.relu(tf.matmul(tf_test_dataset, weights_h) + biases_h), weights ) + biases )
-
-
-num_steps = 3001
+  train_prediction = tf.nn.softmax( prediction(tf_train_dataset) )
+  valid_prediction = tf.nn.softmax( prediction(tf_valid_dataset) )
+  test_prediction  = tf.nn.softmax( prediction(tf_test_dataset ) )
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
@@ -209,3 +200,5 @@ with tf.Session(graph=graph) as session:
       print("Validation accuracy: %.1f%%" % accuracy(
         valid_prediction.eval(), valid_labels))
   print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+
+

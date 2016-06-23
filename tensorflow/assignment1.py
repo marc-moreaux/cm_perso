@@ -56,7 +56,7 @@ def load_letter(folder, min_num_images):
   for image in os.listdir(folder):
     image_file = os.path.join(folder, image)
     try:
-      image_data = (ndimag.eimread(image_file).astype(float) - 
+      image_data = (ndimage.imread(image_file).astype(float) - 
                     pixel_depth / 2) / pixel_depth
       if image_data.shape != (image_size, image_size):
         raise Exception('Unexpected image shape: %s' % str(image_data.shape))

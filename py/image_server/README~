@@ -1,0 +1,3 @@
+run here:
+python2 -m SimpleHTTPServer 8081
+to have a proper image server

@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+<TITLE>Img preview</TITLE>
+ 
+<script type="text/javascript"
+    src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script>
+    $(document).ready(
+            function() {
+                setInterval(function() {
+                   	$('#img').attr("src","new.jpg?"+ new Date().getTime());
+                }, 350);
+            });
+</script>
+ 
+</HEAD>
+<BODY>
+<img id="img" src="new.jpg" style="position:absolute;top:0%;left:0%;height:100%;width:100%"/>
+</BODY>
+</HTML>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <html>
+<script>
+
+var newImage = new Image();
+
+function updateImage() {
+    if(newImage.complete) {
+           newImage.src = document.getElementById("img").src;
+           var temp = newImage.src;
+           document.getElementById("img").src = newImage.src;
+           newImage = new Image();
+           newImage.src = temp+"?" + new Date().getTime();
+
+}
+setTimeout(updateImage, 100);
+};
+</script>
+
+<body onload="updateImage();">
+<img id="img" src="new.jpg" style="position:absolute;top:0;left:0;height:100%;width:100%"/>
+</body>
+</html> -->
+
+
+
+<!-- <img id="img" src="http://10.0.164.204:8081/new.jpg" style="position:absolute;top:0;left:0;height:90%;width:90%"/> -->
+<!-- document.getElementById('yourimage').src = "url/of/image.jpg?random="+new Date().getTime(); -->
+

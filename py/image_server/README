@@ -1,3 +1,4 @@
-run here:
-python2 -m SimpleHTTPServer 80
-to have a proper image server
+# To have a proper image server
+# run here:
+python2 -m SimpleHTTPServer 8081
+

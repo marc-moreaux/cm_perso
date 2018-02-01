@@ -1,14 +1,36 @@
+#!/usr/bin/python
 
+''' Pepper frame grabber
+Reads frames retrieved from pepper
+
+Example output:
+./pepper_frame_grabber --ip 10.0.10.1
+'''
 
 import naoqi
 from naoqi import ALProxy
 import vision_definitions
+import argparse
 import time
 
 import numpy as np
 from PIL import Image
 import cv2
 
+
+def get_args():
+    '''Parse the arguments recieved'''
+    # Assign description to the help doc
+    parser = argparse.ArgumentParser(
+        description='Reads frames retrieved from pepper')
+    # Add arguments
+    parser.add_argument(
+        '-i', '--ip', type=str, help='IP of your pepper', required=True)
+    parser.add_argument(
+        '-f', '--frames', type=int, help='Amount of frames to grab',
+        required=False, default=10)
+    args = parser.parse_args()
+    return args
 
 
 class Stream:
@@ -35,7 +57,6 @@ class Stream:
         self.tracking_state = 0
         self.show_backproj = False
 
-
     def onmouse(self, event, x, y, flags, param):
         x, y = np.int16([x, y]) # BUG
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -55,8 +76,6 @@ class Stream:
                 if self.selection is not None:
                     self.tracking_state = 1
 
-
-
     def getImage(self):
         t0 = time.time()
         naoImage = self.camProxy.getImageRemote(self.videoClient)
@@ -66,26 +85,23 @@ class Stream:
         self.imWidth = naoImage[0]
         self.imHeight = naoImage[1]
         self.array = naoImage[6]
-        _image = Image.fromstring("RGB", (self.imWidth, self.imHeight), self.array)
+        _image = Image.frombytes("RGB", (self.imWidth, self.imHeight), self.array)
         self.image = np.array(_image)
         self.image = self.image[:, :, ::-1].copy()
         cv2.imshow('myWindow', self.image)
         ch = 0xFF & cv2.waitKey(5)
         return ch
         
-
-
     def __del__(self):
         self.camProxy.unsubscribe(self.videoClient);
         cv2.destroyAllWindows()
 
 
-
-
-
-
-im = Stream("jarc.local")
-for i in range(110):
+args = get_args()
+ip = args.ip
+n_frames = args.frames
+im = Stream(ip)
+for i in range(n_frames):
     key = im.getImage()
     if key == 27:
         break

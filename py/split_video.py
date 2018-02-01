@@ -26,34 +26,50 @@ def get_args():
     args = parser.parse_args()
     return args
 
-# read the arguments
-args = get_args()
-video_path = args.input
-cwd = os.path.dirname(video_path)
-dest_d = os.path.join(cwd, 'slices')
-video_name = os.path.basename(video_path)
 
-# Maybe create the directory
-if not os.path.isdir(dest_d):
-    os.makedirs(dest_d)
+def split_videos(cwd, dest_d, video_name):
+    ''' Takes a video of many minutes as input and splits it into 30 seconds splits
 
-# Split in 30 seconds slices
-for t in range(0, 60*14, 30):
-    time = '00:{:02d}:{:02d}'.format(t/60, t%60)
-    output_file = video_name.split('.')[0] + '_' + time + '.' + video_name.split('.')[1]
-    video_cpy_path = os.path.join(dest_d + output_file)
+    Arguments
+        cwd: current working directory (str)
+        dest_d: destination directory (str)
+        video_name: name of the video (str)
+    '''
+    video_path = os.path.join(cwd, video_name)
     
-    # Maybe delete existing file
-    if os.path.isfile(video_cpy_path):
-        print 'deleting {}'.format(video_cpy_path)
-        os.remove(video_cpy_path)
-    # Do the copy
-    cmd = 'ffmpeg -i {} -ss {} -t 00:00:30.00 -vcodec h264 -acodec mp3 {}'.format(
-        os.path.join(cwd, video_name),
-        time,
-        video_cpy_path)
-    print cmd
-    subprocess.call([cmd], shell=True)
+    
+    # Maybe create the directory
+    if not os.path.isdir(dest_d):
+        os.makedirs(dest_d)
 
+    # Split in 30 seconds slices
+    for t in range(0, 60*14, 30):
+        time = '00:{:02d}:{:02d}'.format(t/60, t%60)
+        output_file = video_name.split('.')[0] + '_' + time + '.' + video_name.split('.')[1]
+        video_cpy_path = os.path.join(dest_d + output_file)
+        
+        # Maybe delete existing file
+        if os.path.isfile(video_cpy_path):
+            print 'deleting {}'.format(video_cpy_path)
+            os.remove(video_cpy_path)
+        # Do the copy
+        cmd = 'ffmpeg -i {} -ss {} -t 00:00:30.00 -vcodec h264 -acodec mp3 {}'.format(
+            os.path.join(cwd, video_name),
+            time,
+            video_cpy_path)
+        print cmd
+        subprocess.call([cmd], shell=True)
+
+
+if __name__ == "__main__":
+    # read the arguments
+    args = get_args()
+    video_path = args.input
+    cwd = os.path.dirname(video_path)
+    dest_d = os.path.join(cwd, args.output_path)
+    video_name = os.path.basename(video_path)
+
+    # Call the splitting function
+    split_videos(cwd, dest_d, video_name)
 
     

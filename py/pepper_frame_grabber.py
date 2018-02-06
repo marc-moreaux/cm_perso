@@ -29,7 +29,7 @@ def get_args():
         required=True)
     parser.add_argument(
         '-p', '--port', type=int, help='Port to connect to',
-        required=False, default=10)
+        required=False, default=9559)
     parser.add_argument(
         '-f', '--frames', type=int, help='Amount of frames to grab',
         required=False, default=10)

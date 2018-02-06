@@ -27,8 +27,14 @@ def get_args():
     parser.add_argument(
         '-i', '--ip', type=str, help='IP of your pepper', required=True)
     parser.add_argument(
+        '-p', '--port', type=int, help='Port to connect to',
+        required=False, default=10)
+    parser.add_argument(
         '-f', '--frames', type=int, help='Amount of frames to grab',
         required=False, default=10)
+    parser.add_argument(
+        '-r', '--return_img', type=bool, help='Return the frame as string',
+        required=False, default=False)
     args = parser.parse_args()
     return args
 
@@ -99,9 +105,17 @@ class Stream:
 
 args = get_args()
 ip = args.ip
+port = args.port
 n_frames = args.frames
-im = Stream(ip)
-for i in range(n_frames):
-    key = im.getImage()
-    if key == 27:
-        break
+
+im = Stream(ip, port)
+if args.return_img is True:
+    im.getImage()
+    print 'image :'
+    print str(im.image)
+else:
+    for i in range(n_frames):
+        key = im.getImage()
+        if key == 27:
+            break
+del im
